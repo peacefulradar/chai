@@ -3,189 +3,403 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sakshi — Build Something? 🛠️</title>
-
+<title>Let's Make a Plan 🗺️</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    height: 100vh;
+    min-height: 100vh;
     font-family: 'Sora', Arial, sans-serif;
-    overflow: hidden;
     background: #f5f0e8;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
   }
 
   body::before {
     content: '';
-    position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.5;
+    position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.4;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   }
 
-  .container {
-    position: relative; z-index: 1;
-    height: 100%;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    padding: 28px;
-    gap: 10px;
-  }
+  .screen { display: none; flex-direction: column; align-items: center; text-align: center; position: relative; z-index: 1; width: 100%; max-width: 860px; }
+  .screen.active { display: flex; }
 
+  /* SCREEN 1 */
   .badge {
     font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
     text-transform: uppercase; color: #c0392b;
     background: #fdecea; border: 1.5px solid #f5c6c2;
-    padding: 5px 14px; border-radius: 20px;
-    margin-bottom: 6px;
+    padding: 5px 14px; border-radius: 20px; margin-bottom: 16px;
   }
-
   h1 {
-    font-size: clamp(22px, 5vw, 32px);
-    font-weight: 700; color: #1a1612;
-    line-height: 1.3; max-width: 480px;
-    letter-spacing: -0.5px;
+    font-size: clamp(24px, 5vw, 38px);
+    font-weight: 700; color: #1a1612; line-height: 1.3;
+    letter-spacing: -0.5px; margin-bottom: 10px;
   }
-
   h1 span { color: #c0392b; font-style: italic; }
+  p.sub { font-size: 14px; color: #9a948e; line-height: 1.7; margin-bottom: 28px; }
 
-  p.sub {
-    font-size: 14px; color: #9a948e;
-    max-width: 340px; line-height: 1.7;
-    margin-top: 4px;
+  .options-grid {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
   }
-
-  .btn-row {
-    display: flex; gap: 12px; flex-wrap: wrap;
-    justify-content: center; margin-top: 18px;
-  }
-
-  button {
-    padding: 13px 28px;
-    font-size: 15px; font-family: 'Sora', Arial, sans-serif;
-    font-weight: 600; border: none; border-radius: 12px;
-    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
-  }
-
-  button:active { transform: scale(0.96) !important; }
-
-  .yes-btn {
-    background: #1a1612; color: #f5f0e8;
-    box-shadow: 0 4px 18px rgba(26,22,18,0.2);
-  }
-  .yes-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,22,18,0.28); }
-
-  .no-btn {
-    background: #ede8dc; color: #9a948e;
-    border: 1.5px solid #e3ddd0;
-    position: absolute;
-    transition: top 0.35s cubic-bezier(.4,0,.2,1), left 0.35s cubic-bezier(.4,0,.2,1), transform 0.2s;
-  }
-
-  #subOptions { display: none; flex-direction: column; gap: 10px; margin-top: 8px; }
-  .opt-btn {
-    background: white; color: #1a1612;
-    border: 1.5px solid #e3ddd0;
-    border-radius: 12px; padding: 12px 24px;
-    font-size: 14px; font-family: 'Sora', Arial, sans-serif; font-weight: 500;
+  .option-card {
+    background: white; border: 1.5px solid #e3ddd0;
+    border-radius: 16px; padding: 22px 28px;
     cursor: pointer; transition: all 0.2s;
+    font-family: 'Sora', Arial, sans-serif;
+    font-size: 15px; font-weight: 600; color: #1a1612;
+    min-width: 160px;
   }
-  .opt-btn:hover { border-color: #c0392b; color: #c0392b; transform: translateY(-2px); box-shadow: 0 4px 14px rgba(192,57,43,0.12); }
+  .option-card:hover { border-color: #c0392b; color: #c0392b; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(192,57,43,0.12); }
+  .option-card .icon { font-size: 28px; display: block; margin-bottom: 8px; }
 
-  #response {
-    margin-top: 16px;
-    font-size: 16px; line-height: 1.7;
-    color: #1a1612; max-width: 380px;
-    opacity: 0; transition: opacity 0.5s ease;
-    font-weight: 500;
+  /* SCREEN 2 - MAP */
+  #screen2 h2 { font-size: clamp(20px, 4vw, 28px); font-weight: 700; color: #1a1612; margin-bottom: 6px; }
+  #screen2 p { font-size: 13px; color: #9a948e; margin-bottom: 18px; }
+
+  #map-container {
+    width: 100%; max-width: 520px;
+    background: white; border-radius: 20px;
+    border: 1.5px solid #e3ddd0;
+    padding: 16px;
+    box-shadow: 0 8px 32px rgba(26,22,18,0.08);
   }
+
+  svg#india-map {
+    width: 100%; height: auto;
+  }
+
+  svg#india-map path {
+    fill: #ede8dc;
+    stroke: #c8bfb0;
+    stroke-width: 1;
+    cursor: pointer;
+    transition: fill 0.2s, transform 0.2s;
+    transform-origin: center;
+  }
+
+  svg#india-map path:hover { fill: #f5c6c2; }
+  svg#india-map path.selected { fill: #c0392b; }
+
+  .tooltip {
+    position: fixed;
+    background: #1a1612; color: #f5f0e8;
+    padding: 6px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+    pointer-events: none; opacity: 0;
+    transition: opacity 0.2s; z-index: 100;
+    white-space: nowrap;
+  }
+
+  .back-btn {
+    margin-top: 16px;
+    background: none; border: 1.5px solid #e3ddd0;
+    border-radius: 10px; padding: 8px 20px;
+    font-family: 'Sora', Arial, sans-serif;
+    font-size: 13px; color: #9a948e; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { border-color: #1a1612; color: #1a1612; }
+
+  /* SCREEN 3 - RESULT */
+  #screen3 { gap: 0; }
+  .result-card {
+    background: white; border-radius: 24px;
+    border: 1.5px solid #e3ddd0;
+    padding: 36px 32px; max-width: 460px; width: 100%;
+    box-shadow: 0 12px 40px rgba(26,22,18,0.1);
+    animation: popIn 0.4s cubic-bezier(.175,.885,.32,1.275);
+  }
+  @keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  .result-emoji { font-size: 52px; margin-bottom: 14px; }
+  .result-state { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #c0392b; margin-bottom: 8px; }
+  .result-place { font-size: clamp(22px, 4vw, 30px); font-weight: 700; color: #1a1612; margin-bottom: 12px; line-height: 1.2; }
+  .result-desc { font-size: 14px; color: #6b6560; line-height: 1.8; margin-bottom: 24px; }
+  .result-tags { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+  .tag {
+    background: #fdecea; color: #c0392b;
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 12px; font-weight: 600;
+  }
+  .btn-row-result { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .primary-btn {
+    background: #1a1612; color: #f5f0e8;
+    border: none; border-radius: 12px;
+    padding: 12px 24px; font-family: 'Sora', Arial, sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .primary-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,22,18,0.25); }
+  .secondary-btn {
+    background: #ede8dc; color: #6b6560;
+    border: 1.5px solid #e3ddd0; border-radius: 12px;
+    padding: 12px 24px; font-family: 'Sora', Arial, sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .secondary-btn:hover { border-color: #1a1612; color: #1a1612; }
 
   @keyframes floatUp {
-    0%   { transform: translateY(0) scale(0.8) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(-110vh) scale(1.1) rotate(15deg); opacity: 0; }
+    0%   { transform: translateY(0) scale(0.8); opacity: 1; }
+    100% { transform: translateY(-110vh) scale(1.1); opacity: 0; }
   }
-  .floater {
-    position: fixed; bottom: -40px;
-    font-size: 22px; pointer-events: none;
-    animation: floatUp linear infinite;
-  }
+  .floater { position: fixed; bottom: -40px; font-size: 20px; pointer-events: none; animation: floatUp linear infinite; }
 </style>
 </head>
-
 <body>
 
-<div class="container">
-  <div class="badge">🛠️ A proposal</div>
+<div class="tooltip" id="tooltip"></div>
 
-  <h1>Sakshi, want to <span>build something</span> together?</h1>
-  <p class="sub">Got an idea. Need a co-builder. Thought of you first.</p>
-
-  <div class="btn-row" id="mainOptions">
-    <button class="yes-btn" onclick="yesClicked()">Yes, tell me more 🚀</button>
-    <button class="no-btn" id="noBtn">Nah, not interested</button>
+<!-- SCREEN 1 -->
+<div class="screen active" id="screen1">
+  <div class="badge">🗺️ Weekend Plan</div>
+  <h1>Let's make a <span>plan</span> together</h1>
+  <p class="sub">Pick what kind of trip you're feeling this weekend</p>
+  <div class="options-grid">
+    <div class="option-card" onclick="goToMap('nature')">
+      <span class="icon">🏔️</span>Nature & Hills
+    </div>
+    <div class="option-card" onclick="goToMap('beach')">
+      <span class="icon">🏖️</span>Beach Vibes
+    </div>
+    <div class="option-card" onclick="goToMap('culture')">
+      <span class="icon">🏛️</span>Culture & History
+    </div>
+    <div class="option-card" onclick="goToMap('food')">
+      <span class="icon">🍜</span>Food Trip
+    </div>
   </div>
+</div>
 
-  <div id="subOptions">
-    <button class="opt-btn" onclick="finalChoice('what')">What are we building? 👀</button>
-    <button class="opt-btn" onclick="finalChoice('when')">When do we start? ⚡</button>
-    <button class="opt-btn" onclick="finalChoice('how')">How does this work? 🤝</button>
+<!-- SCREEN 2 -->
+<div class="screen" id="screen2">
+  <h2>Pick a state 👇</h2>
+  <p id="map-subtitle">Click any state to discover a weekend spot</p>
+
+  <div id="map-container">
+    <!-- Simplified India SVG Map with major states -->
+    <svg id="india-map" viewBox="0 0 550 600" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Jammu & Kashmir -->
+      <path id="JK" data-name="Jammu & Kashmir" d="M150,10 L220,10 L260,40 L280,80 L250,100 L200,90 L160,70 L140,40 Z" onclick="selectState(this)" />
+      <!-- Himachal Pradesh -->
+      <path id="HP" data-name="Himachal Pradesh" d="M200,90 L250,100 L270,130 L240,150 L200,140 L180,120 Z" onclick="selectState(this)" />
+      <!-- Punjab -->
+      <path id="PB" data-name="Punjab" d="M160,100 L200,90 L200,140 L180,160 L150,150 L140,120 Z" onclick="selectState(this)" />
+      <!-- Uttarakhand -->
+      <path id="UK" data-name="Uttarakhand" d="M250,100 L310,110 L320,140 L290,160 L260,155 L240,150 L270,130 Z" onclick="selectState(this)" />
+      <!-- Haryana -->
+      <path id="HR" data-name="Haryana" d="M150,150 L180,160 L200,140 L240,150 L245,180 L210,195 L175,185 L150,170 Z" onclick="selectState(this)" />
+      <!-- Delhi -->
+      <path id="DL" data-name="Delhi" d="M210,175 L230,175 L230,195 L210,195 Z" onclick="selectState(this)" />
+      <!-- Uttar Pradesh -->
+      <path id="UP" data-name="Uttar Pradesh" d="M245,150 L320,140 L370,160 L380,200 L350,230 L300,240 L250,230 L230,200 L245,180 Z" onclick="selectState(this)" />
+      <!-- Rajasthan -->
+      <path id="RJ" data-name="Rajasthan" d="M100,160 L150,150 L175,185 L210,195 L230,200 L220,260 L180,290 L120,280 L80,240 L80,200 Z" onclick="selectState(this)" />
+      <!-- Bihar -->
+      <path id="BR" data-name="Bihar" d="M370,160 L430,165 L440,200 L420,225 L380,230 L350,230 L380,200 Z" onclick="selectState(this)" />
+      <!-- Jharkhand -->
+      <path id="JH" data-name="Jharkhand" d="M380,230 L420,225 L440,255 L430,285 L400,295 L370,280 L355,255 Z" onclick="selectState(this)" />
+      <!-- West Bengal -->
+      <path id="WB" data-name="West Bengal" d="M430,165 L480,170 L490,210 L470,260 L450,280 L430,285 L440,255 L440,200 Z" onclick="selectState(this)" />
+      <!-- Sikkim -->
+      <path id="SK" data-name="Sikkim" d="M480,155 L500,155 L505,175 L480,175 Z" onclick="selectState(this)" />
+      <!-- Assam -->
+      <path id="AS" data-name="Assam" d="M490,170 L540,165 L545,190 L520,210 L490,210 Z" onclick="selectState(this)" />
+      <!-- Meghalaya -->
+      <path id="ML" data-name="Meghalaya" d="M490,210 L520,210 L525,230 L495,235 Z" onclick="selectState(this)" />
+      <!-- Arunachal Pradesh -->
+      <path id="AR" data-name="Arunachal Pradesh" d="M500,140 L550,140 L550,170 L540,165 L500,160 Z" onclick="selectState(this)" />
+      <!-- Nagaland -->
+      <path id="NL" data-name="Nagaland" d="M530,190 L550,190 L550,215 L530,215 Z" onclick="selectState(this)" />
+      <!-- Manipur -->
+      <path id="MN" data-name="Manipur" d="M530,215 L550,215 L548,240 L528,240 Z" onclick="selectState(this)" />
+      <!-- Mizoram -->
+      <path id="MZ" data-name="Mizoram" d="M520,240 L540,240 L538,265 L518,265 Z" onclick="selectState(this)" />
+      <!-- Tripura -->
+      <path id="TR" data-name="Tripura" d="M505,240 L520,240 L518,265 L503,260 Z" onclick="selectState(this)" />
+      <!-- Madhya Pradesh -->
+      <path id="MP" data-name="Madhya Pradesh" d="M180,290 L220,260 L250,230 L300,240 L350,230 L370,280 L355,255 L355,310 L310,340 L260,345 L210,330 L180,310 Z" onclick="selectState(this)" />
+      <!-- Gujarat -->
+      <path id="GJ" data-name="Gujarat" d="M60,260 L80,240 L120,280 L130,310 L110,340 L80,350 L50,330 L40,300 Z" onclick="selectState(this)" />
+      <!-- Maharashtra -->
+      <path id="MH" data-name="Maharashtra" d="M130,310 L180,310 L210,330 L260,345 L265,385 L230,410 L180,415 L140,395 L110,360 L110,340 Z" onclick="selectState(this)" />
+      <!-- Odisha -->
+      <path id="OD" data-name="Odisha" d="M355,255 L400,295 L420,330 L410,370 L375,385 L340,370 L320,340 L330,305 Z" onclick="selectState(this)" />
+      <!-- Chhattisgarh -->
+      <path id="CG" data-name="Chhattisgarh" d="M310,240 L355,255 L330,305 L320,340 L290,345 L265,320 L265,285 Z" onclick="selectState(this)" />
+      <!-- Telangana -->
+      <path id="TS" data-name="Telangana" d="M265,385 L300,370 L340,370 L345,405 L310,430 L270,420 Z" onclick="selectState(this)" />
+      <!-- Andhra Pradesh -->
+      <path id="AP" data-name="Andhra Pradesh" d="M300,370 L375,385 L390,420 L370,455 L330,470 L290,455 L270,420 L310,430 Z" onclick="selectState(this)" />
+      <!-- Karnataka -->
+      <path id="KA" data-name="Karnataka" d="M180,415 L230,410 L270,420 L290,455 L275,490 L240,510 L200,505 L170,475 L155,440 Z" onclick="selectState(this)" />
+      <!-- Goa -->
+      <path id="GA" data-name="Goa" d="M150,440 L165,440 L165,460 L150,460 Z" onclick="selectState(this)" />
+      <!-- Kerala -->
+      <path id="KL" data-name="Kerala" d="M200,505 L240,510 L245,545 L220,575 L195,570 L185,540 Z" onclick="selectState(this)" />
+      <!-- Tamil Nadu -->
+      <path id="TN" data-name="Tamil Nadu" d="M240,510 L275,490 L300,510 L310,545 L290,575 L260,585 L230,575 L220,575 L245,545 Z" onclick="selectState(this)" />
+    </svg>
   </div>
+  <button class="back-btn" onclick="goBack(1)">← Change trip type</button>
+</div>
 
-  <div id="response"></div>
+<!-- SCREEN 3 -->
+<div class="screen" id="screen3">
+  <div class="result-card">
+    <div class="result-emoji" id="res-emoji">🏔️</div>
+    <div class="result-state" id="res-state">State</div>
+    <div class="result-place" id="res-place">Place Name</div>
+    <div class="result-desc" id="res-desc">Description</div>
+    <div class="result-tags" id="res-tags"></div>
+    <div class="btn-row-result">
+      <button class="primary-btn" onclick="shareIt()">Share this plan 🚀</button>
+      <button class="secondary-btn" onclick="goBack(2)">Try another state</button>
+    </div>
+  </div>
 </div>
 
 <script>
-  const noBtn = document.getElementById('noBtn');
-  const response = document.getElementById('response');
-  const mainOptions = document.getElementById('mainOptions');
-  const subOptions = document.getElementById('subOptions');
+  let selectedVibe = '';
 
-  function placeNoBtn() {
-    const pad = 24;
-    const w = noBtn.offsetWidth || 140;
-    const h = noBtn.offsetHeight || 48;
-    const maxX = window.innerWidth - w - pad;
-    const maxY = window.innerHeight - h - pad;
-    noBtn.style.left = (pad + Math.random() * maxX) + 'px';
-    noBtn.style.top  = (pad + Math.random() * maxY) + 'px';
-  }
-  placeNoBtn();
-  noBtn.addEventListener('mouseover', placeNoBtn);
-  noBtn.addEventListener('touchstart', e => { e.preventDefault(); placeNoBtn(); });
+  const destinations = {
+    nature: {
+      JK:  { emoji:'🏔️', place:'Gulmarg', desc:'Snow-capped peaks, gondola rides and meadows that feel straight out of a dream. Perfect for a quick winter escape.', tags:['🎿 Skiing','🌨️ Snow','🏔️ Mountains'] },
+      HP:  { emoji:'🌲', place:'Kasol', desc:'A tiny Himalayan village on the Parvati River. Ideal for trekking, river camping and doing absolutely nothing.', tags:['🏕️ Camping','🥾 Trek','🌊 River'] },
+      UK:  { emoji:'🌿', place:'Chopta', desc:'India\'s mini Switzerland. Rolling meadows, rhododendron forests and the Tungnath temple hike.', tags:['🥾 Trek','🌸 Meadows','🕌 Temple'] },
+      SK:  { emoji:'🏔️', place:'Gurudongmar Lake', desc:'One of the highest lakes in the world at 17,800 ft. Sacred and stunningly beautiful.', tags:['🏔️ High Altitude','🌊 Lake','📸 Photography'] },
+      AR:  { emoji:'🌿', place:'Ziro Valley', desc:'A UNESCO heritage site with lush paddy fields and tribal culture. Untouched and peaceful.', tags:['🌾 Valley','🎵 Music Fest','🏕️ Camping'] },
+      MN:  { emoji:'🌿', place:'Dzukou Valley', desc:'The valley of flowers of Northeast India. Seasonal blooms and dramatic ridgelines.', tags:['🌸 Flowers','🥾 Trek','🌄 Sunrise'] },
+      MH:  { emoji:'🏰', place:'Lonavala', desc:'Hill station between Mumbai and Pune with waterfalls, forts and chikki. Great for a 2-day escape.', tags:['🌊 Waterfall','🏰 Fort','🌧️ Monsoon'] },
+      KA:  { emoji:'🌿', place:'Coorg', desc:'Scotland of India — misty hills, coffee estates and rivers. Perfect for a lazy weekend with good food.', tags:['☕ Coffee','🌿 Estate','🏞️ Waterfall'] },
+      KL:  { emoji:'🌴', place:'Munnar', desc:'Tea gardens stretching to the horizon with cool air and silent mornings. A reset button for the soul.', tags:['🍵 Tea','🌿 Hills','🌅 Sunrise'] },
+      default: { emoji:'🌿', place:'Coorg, Karnataka', desc:'Coffee estates, misty hills and waterfalls. A classic nature escape.', tags:['☕ Coffee','🌿 Nature','🏞️ Waterfall'] }
+    },
+    beach: {
+      GJ:  { emoji:'🏖️', place:'Mandvi Beach', desc:'Pristine beach in Kutch with the old Vijay Vilas Palace nearby. Offbeat and gorgeous.', tags:['🏰 Palace','🌊 Sea','🐪 Kutch'] },
+      MH:  { emoji:'🌊', place:'Tarkarli', desc:'Crystal clear waters perfect for snorkeling and scuba. Maharashtra\'s best kept beach secret.', tags:['🤿 Scuba','🌊 Clear Water','🐠 Snorkel'] },
+      GA:  { emoji:'🏖️', place:'Gokarna', desc:'Quieter than Goa but just as beautiful. Om Beach and Half Moon Beach are magical.', tags:['🏕️ Camping','🌊 Beach','🧘 Chill'] },
+      KA:  { emoji:'🌊', place:'Gokarna', desc:'Rocky coves and pristine beaches without the crowds. Trek between beaches along the coast.', tags:['🥾 Trek','🌊 Beach','🔥 Bonfire'] },
+      KL:  { emoji:'🌴', place:'Varkala', desc:'Cliffside beach town with red laterite cliffs dropping into the Arabian Sea. Magical sunsets.', tags:['🌅 Sunset','🧘 Yoga','🌊 Cliffs'] },
+      AP:  { emoji:'🏖️', place:'Rushikonda Beach', desc:'Clean, safe beach near Vizag with water sports and a great vibe. Underrated gem.', tags:['🏄 Water Sports','🌊 Beach','🌅 Sunset'] },
+      TN:  { emoji:'🌊', place:'Rameswaram', desc:'Island town with turquoise waters, ancient temples and fresh seafood. Unique and spiritual.', tags:['🕌 Temple','🐟 Seafood','🌊 Sea'] },
+      OD:  { emoji:'🌊', place:'Puri', desc:'Golden beach, Jagannath temple and the famous Odisha cuisine. A wholesome weekend.', tags:['🏖️ Beach','🕌 Temple','🍛 Food'] },
+      WB:  { emoji:'🌊', place:'Mandarmani', desc:'Longest driveable beach in India. Crabs, bonfires and salty air.', tags:['🦀 Crabs','🔥 Bonfire','🚗 Drive'] },
+      default: { emoji:'🏖️', place:'Gokarna, Karnataka', desc:'Serene beaches and cliffside trails. The anti-Goa beach escape.', tags:['🌊 Beach','🏕️ Camp','🌅 Sunset'] }
+    },
+    culture: {
+      RJ:  { emoji:'🏰', place:'Jaisalmer', desc:'The Golden City rising from the Thar Desert. Fort, havelis, dunes and starry nights.', tags:['🏰 Fort','🐪 Desert','⭐ Stargazing'] },
+      MP:  { emoji:'🐯', place:'Khajuraho', desc:'UNESCO World Heritage temples with intricate 10th-century carvings. Jaw-dropping craftsmanship.', tags:['🏛️ Temples','📸 Heritage','🎨 Art'] },
+      UP:  { emoji:'🕌', place:'Varanasi', desc:'The oldest living city. Ghats, aarti, chai and an energy unlike anywhere else on Earth.', tags:['🕌 Spiritual','🌊 Ghats','☕ Chai'] },
+      BR:  { emoji:'🏛️', place:'Bodh Gaya', desc:'Where Buddha attained enlightenment. The Mahabodhi Temple complex is simply awe-inspiring.', tags:['☮️ Peace','🕌 Temple','🧘 Meditate'] },
+      OD:  { emoji:'🕌', place:'Konark Sun Temple', desc:'A 13th-century chariot-shaped temple. One of the most architecturally stunning sites in India.', tags:['🏛️ UNESCO','☀️ Sun Temple','📸 Heritage'] },
+      TN:  { emoji:'🏛️', place:'Mahabalipuram', desc:'Shore temples carved from rock, right by the sea. 7th-century Pallava genius.', tags:['🏛️ UNESCO','🌊 Shore','🎨 Sculpture'] },
+      KA:  { emoji:'🏰', place:'Hampi', desc:'A ruined empire spread across boulders and banana farms. Magical and otherworldly.', tags:['🏛️ UNESCO','🪨 Boulders','🚲 Explore'] },
+      MH:  { emoji:'⛰️', place:'Ajanta & Ellora', desc:'Ancient cave temples with Buddhist murals and Jain sculptures. A civilisation in stone.', tags:['🏛️ UNESCO','🎨 Murals','🕌 Caves'] },
+      GJ:  { emoji:'🏛️', place:'Vadodara', desc:'Baroda\'s Laxmi Vilas Palace is bigger than Buckingham Palace. A royal weekend awaits.', tags:['🏰 Palace','🎭 Culture','🎨 Arts'] },
+      AP:  { emoji:'🕌', place:'Tirupati', desc:'The richest temple in the world. Spiritual energy and the famous Tirupati laddoo.', tags:['🕌 Temple','☮️ Spiritual','🍬 Laddoo'] },
+      default: { emoji:'🏰', place:'Hampi, Karnataka', desc:'Ruined empire, boulders and bananafarms. India\'s most surreal heritage site.', tags:['🏛️ UNESCO','🪨 Unique','📸 Photography'] }
+    },
+    food: {
+      MH:  { emoji:'🍛', place:'Mumbai', desc:'Vada pav, pav bhaji, kebabs at Mohammad Ali Road and the best cutting chai. A food city like no other.', tags:['🥙 Street Food','☕ Chai','🌃 Night Life'] },
+      WB:  { emoji:'🍚', place:'Kolkata', desc:'Kathi rolls, mishti doi, hilsa fish and phuchka. Bengal\'s food culture is its own religion.', tags:['🌯 Kathi Roll','🍬 Sweets','🐟 Fish'] },
+      RJ:  { emoji:'🍲', place:'Jodhpur', desc:'Dal baati churma, mirchi bada and makhaniya lassi. Rich, spicy and totally addictive.', tags:['🍲 Dal Baati','🥛 Lassi','🌶️ Spicy'] },
+      TN:  { emoji:'🍛', place:'Chennai', desc:'Filter coffee, dosas, chettinad curry and seafood. The south Indian food capital.', tags:['☕ Filter Coffee','🥞 Dosa','🌶️ Chettinad'] },
+      KL:  { emoji:'🥥', place:'Fort Kochi', desc:'Appam, fish molee, prawn curry and banana chips. Kerala food hits different by the sea.', tags:['🐟 Seafood','🥥 Coconut','🫙 Spices'] },
+      PB:  { emoji:'🧈', place:'Amritsar', desc:'Amritsari kulcha, dal makhani, lassi and the Golden Temple langar. Punjab is love.', tags:['🫓 Kulcha','🧈 Butter','🥛 Lassi'] },
+      GJ:  { emoji:'🍽️', place:'Ahmedabad', desc:'Dhokla, fafda-jalebi, thepla and the incredible Manek Chowk night market.', tags:['🌙 Night Market','🍮 Dhokla','🍩 Jalebi'] },
+      OD:  { emoji:'🍚', place:'Cuttack', desc:'Dahi bara aloo dum, chaat and the unique Odia sweets. Underrated food city.', tags:['🥙 Street Food','🍬 Sweets','🌶️ Chaat'] },
+      AP:  { emoji:'🌶️', place:'Hyderabad', desc:'Dum biryani, haleem, Irani chai and double ka meetha. The city that lives to eat.', tags:['🍛 Biryani','☕ Irani Chai','🌶️ Spicy'] },
+      TS:  { emoji:'🍛', place:'Hyderabad', desc:'The biryani capital of India. Add Irani chai and Osmania biscuits for the full experience.', tags:['🍛 Biryani','☕ Irani Chai','🏰 Old City'] },
+      KA:  { emoji:'🥞', place:'Bengaluru', desc:'Masala dosa at MTR, filter coffee and the iconic Vidyarthi Bhavan breakfast. A foodie\'s paradise.', tags:['🥞 Dosa','☕ Coffee','🌆 City'] },
+      default: { emoji:'🍛', place:'Hyderabad, Telangana', desc:'The biryani capital of India. Enough said.', tags:['🍛 Biryani','🌶️ Spicy','☕ Irani Chai'] }
+    }
+  };
 
-  function showMessage(msg) {
-    response.style.opacity = 0;
-    setTimeout(() => { response.innerHTML = msg; response.style.opacity = 1; }, 300);
-  }
-
-  function yesClicked() {
-    showMessage("Love the energy! 🙌 So... what are you curious about?");
-    mainOptions.style.display = 'none';
-    subOptions.style.display = 'flex';
-  }
-
-  function finalChoice(c) {
-    const msgs = {
-      what: "A personal finance app for India — unified view of UPI, cards & subscriptions in plain language. You in? 👀",
-      when: "Honestly? Yesterday. But realistically — this weekend, one call, zero pressure. 🗓️",
-      how: "No pitch decks. No formalities. Just two people building something real. Split the work, share the wins. 🤝"
+  function goToMap(vibe) {
+    selectedVibe = vibe;
+    const subtitles = {
+      nature: 'Pick a state — find your nature escape 🌿',
+      beach:  'Pick a coastal state — weekend beach trip awaits 🌊',
+      culture:'Pick a state — history is calling 🏛️',
+      food:   'Pick a state — your stomach decides 🍛'
     };
-    showMessage(msgs[c]);
+    document.getElementById('map-subtitle').textContent = subtitles[vibe];
+    showScreen(2);
   }
 
-  const icons = ['💡', '🛠️', '🚀', '⚡', '📱', '✨', '🔧', '💻'];
+  function selectState(el) {
+    document.querySelectorAll('#india-map path').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    const stateId = el.id;
+    const stateName = el.getAttribute('data-name');
+    const vibeData = destinations[selectedVibe];
+    const dest = vibeData[stateId] || vibeData['default'];
+
+    document.getElementById('res-emoji').textContent = dest.emoji;
+    document.getElementById('res-state').textContent = stateName + ' • Weekend Pick';
+    document.getElementById('res-place').textContent = dest.place;
+    document.getElementById('res-desc').textContent = dest.desc;
+
+    const tagsEl = document.getElementById('res-tags');
+    tagsEl.innerHTML = dest.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+    setTimeout(() => showScreen(3), 300);
+  }
+
+  function showScreen(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen' + n).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function goBack(n) {
+    showScreen(n);
+  }
+
+  function shareIt() {
+    const place = document.getElementById('res-place').textContent;
+    const state = document.getElementById('res-state').textContent;
+    const text = `Weekend plan: ${place} (${state}) 🗺️ Let's go!`;
+    if (navigator.share) {
+      navigator.share({ title: 'Weekend Plan', text });
+    } else {
+      navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard! Share it 🚀'));
+    }
+  }
+
+  // Tooltip
+  const tooltip = document.getElementById('tooltip');
+  document.querySelectorAll('#india-map path').forEach(path => {
+    path.addEventListener('mousemove', e => {
+      tooltip.textContent = path.getAttribute('data-name');
+      tooltip.style.opacity = 1;
+      tooltip.style.left = (e.clientX + 12) + 'px';
+      tooltip.style.top  = (e.clientY - 28) + 'px';
+    });
+    path.addEventListener('mouseleave', () => { tooltip.style.opacity = 0; });
+  });
+
+  // Floating icons
+  const icons = ['🗺️','✈️','🏔️','🌊','🍛','🏖️','🌿','⭐'];
   setInterval(() => {
     const el = document.createElement('div');
     el.className = 'floater';
     el.textContent = icons[Math.floor(Math.random() * icons.length)];
     el.style.left = Math.random() * 100 + 'vw';
-    el.style.animationDuration = (4 + Math.random() * 4) + 's';
+    el.style.animationDuration = (5 + Math.random() * 4) + 's';
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 8000);
-  }, 900);
+    setTimeout(() => el.remove(), 9000);
+  }, 1200);
 </script>
-
 </body>
 </html>
